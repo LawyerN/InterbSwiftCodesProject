@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonPropertyOrder({"address", "bankName", "countryISO2", "countryName", "isHeadquarter","swiftCode"})
+@JsonPropertyOrder({"address", "bankName", "countryISO2","countryName",  "isHeadquarter","swiftCode"})
 public class SWIFTCodeDTO {
     @JsonProperty("address")
     private String address;

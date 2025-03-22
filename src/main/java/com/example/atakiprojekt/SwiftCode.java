@@ -9,7 +9,6 @@ import jakarta.validation.constraints.NotNull;
 @AllArgsConstructor
 @Getter
 @Setter
-@Data
 @NoArgsConstructor
 public class SwiftCode {
     @Id
@@ -22,7 +21,7 @@ public class SwiftCode {
     private String countryISO2;
     private String countryName;
     private boolean  headquarterFlag;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name="headquarter_swift", referencedColumnName = "swiftCode")
     private SwiftCode headquarter;
 

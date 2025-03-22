@@ -20,13 +20,13 @@ public class CsvUploadController {
     }
 
     @PostMapping("/swift")
-    public ResponseEntity<String> uploadCSV(@RequestParam("file") MultipartFile file) {
+        public ResponseEntity<String> uploadCSV(@RequestParam("file") MultipartFile file) {
 
         if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("File is empty");
         }
         try {
-            csvParserService.parseAndStoreSwiftData(file);
+            csvParserService.parseAndStoreSwiftData(file.getInputStream());
             return ResponseEntity.ok("Successfully uploaded");
         }catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
