@@ -1,5 +1,7 @@
-package com.example.atakiprojekt;
+package com.example.InternSwiftCodesProject.services;
 
+import com.example.InternSwiftCodesProject.SWIFTCodeRepo;
+import com.example.InternSwiftCodesProject.SwiftCode;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -10,6 +12,9 @@ import java.util.Optional;
 @Service
 public class SWIFTCodeService {
     private final SWIFTCodeRepo swiftCodeRepo;
+    public SWIFTCodeService(SWIFTCodeRepo swiftCodeRepo) {
+        this.swiftCodeRepo = swiftCodeRepo;
+    }
 
     private static final Map<String, String> COUNTRY_NAME_MAP = Map.ofEntries(
             Map.entry("AF", "AFGHANISTAN"),
@@ -106,7 +111,23 @@ public class SWIFTCodeService {
             Map.entry("UZ", "UZBEKISTAN"),
             Map.entry("VN", "VIETNAM"),
             Map.entry("YE", "YEMEN"),
-            Map.entry("ZW", "ZIMBABWE")
+            Map.entry("ZW", "ZIMBABWE"),
+            Map.entry("MC","MONACO"),
+            Map.entry("AS", "AMERICAN SAMOA"),
+            Map.entry("AI", "ANGUILLA"),
+            Map.entry("AQ", "ANTARCTICA"),
+            Map.entry("AG", "ANTIGUA AND BARBUDA"),
+            Map.entry("AW", "ARUBA"),
+            Map.entry("BS", "BAHAMAS (THE)"),
+            Map.entry("BB", "BARBADOS"),
+            Map.entry("BM", "BERMUDA"),
+            Map.entry("BT", "BHUTAN"),
+            Map.entry("BQ", "BONAIRE, SINT EUSTATIUS AND SABA"),
+            Map.entry("BW", "BOTSWANA"),
+            Map.entry("BN", "BRUNEI DARUSSALAM"),
+            Map.entry("KH", "CAMBODIA"),
+            Map.entry("MT", "MALTA")
+
     );
 
     public static boolean isValidCountryCode(String iso2) {
@@ -117,9 +138,6 @@ public class SWIFTCodeService {
         return COUNTRY_NAME_MAP.getOrDefault(iso2, "UNKNOWN");
     }
 
-    public SWIFTCodeService(SWIFTCodeRepo swiftCodeRepo) {
-        this.swiftCodeRepo = swiftCodeRepo;
-    }
     public List<SwiftCode> getSwiftCodesByCountry(String countryISO2) {
         return swiftCodeRepo.findByCountryISO2IgnoreCase(countryISO2);
     }
@@ -190,6 +208,8 @@ public class SWIFTCodeService {
     public boolean existsBySwiftCode(String swiftCode) {
         return swiftCodeRepo.existsBySwiftCode(swiftCode.toUpperCase());
     }
+
+
 
 
 

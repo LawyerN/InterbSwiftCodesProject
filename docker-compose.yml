@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres:15
+    container_name: swift_db
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: swiftdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./db-init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: swift_app
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    environment:
+      SPRING_APPLICATION_NAME: atakiprojekt
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/swiftdb
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SQL_INIT_MODE: always
+
+volumes:
+  pg_data:

@@ -1,6 +1,10 @@
-package com.example.atakiprojekt;
+package com.example.InternSwiftCodesProject.controllers;
 
-import jakarta.validation.Valid;
+import com.example.InternSwiftCodesProject.DTO.SWIFTCodeDTO;
+import com.example.InternSwiftCodesProject.DTO.SWIFTCodeSimpleDTO;
+import com.example.InternSwiftCodesProject.DTO.SwiftCodeWithBranchesDTO;
+import com.example.InternSwiftCodesProject.SwiftCode;
+import com.example.InternSwiftCodesProject.services.SWIFTCodeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -84,6 +88,7 @@ public class SWIFTCodeController {
 
     @GetMapping("/country/{countryISO2}")
     public ResponseEntity<?> getSwiftCodesByCountry(@PathVariable String countryISO2) {
+        countryISO2=countryISO2.toUpperCase().trim();
         List<SwiftCode> swiftCodes = swiftCodeService.getSwiftCodesByCountry (countryISO2);
         Map<String, String> errorResponse = new HashMap<>();
 
@@ -130,13 +135,17 @@ public class SWIFTCodeController {
         String swift = swiftCode.getSwiftCode().trim().toUpperCase();
         String countryISO2 = swiftCode.getCountryISO2().trim().toUpperCase();
         String countryName = swiftCode.getCountryName().trim().toUpperCase();
-        String address = swiftCode.getAddress() != null ? swiftCode.getAddress().trim() : "";
+        String address = swiftCode.getAddress().trim();
         String bankName = swiftCode.getBankName() != null ? swiftCode.getBankName().trim() : "";
 
-        if (swift.isEmpty() || countryISO2.isEmpty() || countryName.isEmpty() || address.isEmpty() || bankName.isEmpty()) {
+        if (swift.isEmpty() || countryISO2.isEmpty() || countryName.isEmpty() || bankName.isEmpty()) {
             errorResponse.put("error", "Missing required fields");
             errorResponse.put("message", "All fields (swiftCode, countryISO2, countryName, address, bankName) must be provided.");
             return ResponseEntity.badRequest().body(errorResponse);
+        }
+
+        if(address.isEmpty()){
+            address = "No address provided";
         }
 
 

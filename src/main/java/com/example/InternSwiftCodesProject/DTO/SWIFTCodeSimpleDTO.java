@@ -1,4 +1,4 @@
-package com.example.atakiprojekt;
+package com.example.InternSwiftCodesProject.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;

@@ -1,11 +1,10 @@
-package com.example.atakiprojekt;
+package com.example.InternSwiftCodesProject;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 import java.util.List;
-import java.util.Set;
 
 @Repository
 public interface SWIFTCodeRepo extends JpaRepository<SwiftCode, String> {

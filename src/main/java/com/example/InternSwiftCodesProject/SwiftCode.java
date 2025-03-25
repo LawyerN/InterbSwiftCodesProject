@@ -1,4 +1,4 @@
-package com.example.atakiprojekt;
+package com.example.InternSwiftCodesProject;
 import jakarta.persistence.*;
 
 import lombok.*;

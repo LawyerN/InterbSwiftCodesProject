@@ -1,18 +1,17 @@
-package com.example.atakiprojekt;
+package com.example.InternSwiftCodesProject.DTO;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonPropertyOrder({ "address", "bankName", "countryISO2", "countryName", "isHeadquarter", "swiftCode", "branches" })
-public class SwiftCodeWithBranchesDTO {
+@JsonPropertyOrder({"address", "bankName", "countryISO2","countryName",  "isHeadquarter","swiftCode"})
+public class SWIFTCodeDTO {
     @JsonProperty("address")
     private String address;
     @JsonProperty("bankName")
@@ -25,8 +24,7 @@ public class SwiftCodeWithBranchesDTO {
     private boolean isHeadquarter;
     @JsonProperty("swiftCode")
     private String swiftCode;
-    @JsonProperty("branches")
-    private List<SWIFTCodeDTO> branches;
+    @JsonGetter("address")
     public String getAddress() {
         return (address == null || address.trim().isEmpty()) ? "No address avaliable" : address;
     }
