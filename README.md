@@ -40,7 +40,7 @@ Description:
 Uploads a CSV file with SWIFT data. Data is validated, parsed, and saved to the database.
 Parameters:
 
-    file (form-data): plik .csv with headers:
+    file (form-data): .csv file with headers:
     SWIFT CODE, NAME, ADDRESS, COUNTRY ISO2 CODE, COUNTRY NAME
 
 #### Responses:
@@ -57,7 +57,7 @@ If it's a headquarter (XXX), also returns related branches.
 
 Parameters:
 
-    {swiftCode} – kod SWIFT (8–11 znaków)
+    {swiftCode} – SWIFT code (8–11 znaków)
 #### Responses:
 ```http
 200 OK – data found  
@@ -136,7 +136,7 @@ If it's a headquarter, the branches become “orphaned”.
 
 Parameters:
 
-    {swiftCode} – kod do usunięcia
+    {swiftCode} – code to be deleted
 
 #### Responses:
 ```http 
@@ -224,7 +224,7 @@ POSTGRES_PASSWORD=haslo123
 ---
 
 ### Add CSV data file
-UPlace your .csv file in the directory:
+Place your .csv file in the directory:
 ````bash
 src/main/resources/data/
 ````
@@ -243,7 +243,7 @@ SWIFT CODE, NAME, ADDRESS, COUNTRY ISO2 CODE, COUNTRY NAME
 
 #### 1. Clean previous builds (required to make step 2 work)
 ```bash
-mvn clean
+mvn clean package
 ```
 
 #### 2. Build and run containers
@@ -265,6 +265,27 @@ Locally:
 ```
 
 > The project uses H2 in-memory database for testing (no Docker or PostgreSQL required).
+
+---
+### 🖼️ Application Screenshots
+#### Example adding a headquarter
+
+![](https://i.imgur.com/fwP5RE0.png)
+
+#### Example adding a branch to the headquarter
+
+![](https://i.imgur.com/QjwgXGi.png)
+
+#### get this code via localhost/v1/swift-codes
+
+![](https://i.imgur.com/E4P1A5R.png)
+
+#### deleting a headquarter
+![](https://i.imgur.com/bkys9Mu.png)
+
+#### getting list of banks from one country by code
+![](https://i.imgur.com/01yy8b0.png)
+
 
 ---
 
@@ -295,7 +316,7 @@ Locally:
 Each user should create their own .env locally or in a CI/CD environment.
 ### 🤖 AI Support
 
-PDuring this project, I used ChatGPT to help with:
+During this project, I used ChatGPT to help with:
 
 - refining validation logic,
 
