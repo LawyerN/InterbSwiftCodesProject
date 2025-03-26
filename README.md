@@ -1,69 +1,71 @@
 # 🌍 InternSwiftCodesProject
 
-Aplikacja do zarządzania i przeszukiwania kodów SWIFT (BIC) banków z całego świata.  
-Umożliwia importowanie danych z plików CSV, filtrowanie, dodawanie i usuwanie wpisów oraz automatyczne łączenie oddziałów z centralą banku.
 
+An application for managing and searching SWIFT (BIC) codes of banks worldwide.
+Allows importing data from CSV files, filtering, adding and deleting entries, and automatically linking branches to the bank's headquarters.
 ---
-## 💡 Opis zadania
+## 💡 Task Description
 
 A SWIFT code, also known as a Bank Identifier Code (BIC), is a unique identifier of a bank's branch or headquarter.  
 This application was built to:
 
-- ✅ Parsować pliki CSV z danymi SWIFT-owymi
-- ✅ Rozpoznawać centrale (`XXX`) i przypisywać im oddziały
-- ✅ Normalizować dane (ISO2, country names, formatowanie)
-- ✅ Przechowywać dane w bazie PostgreSQL
-- ✅ Udostępniać REST API do odczytu i zarządzania
+✅ Parse CSV files with SWIFT data
 
+✅ Recognize headquarters (XXX) and assign branches to them
+
+✅ Normalize data (ISO2, country names, formatting)
+
+✅ Store data in PostgreSQL database
+
+✅ Provide a REST API for reading and managing
 ---
 
-## 📦 Technologie
+## 📦 Technologies
 
 - Java 17
 - Spring Boot 3
 - Spring Data JPA
-- PostgreSQL (produkcyjnie)
-- H2 (do testów)
+- PostgreSQL (for production)
+- H2 (for tests)
 - Docker + Docker Compose
 - Maven
 - Apache Commons CSV
 
 ---
 
-### Opis endpointów
+### Endpoint description
 📤 POST /upload/swift
 
-Opis:
-Przesyła plik CSV z danymi SWIFT. Dane są walidowane, parsowane i zapisywane do bazy.
+Description:
+Uploads a CSV file with SWIFT data. Data is validated, parsed, and saved to the database.
+Parameters:
 
-Parametry:
-
-    file (form-data): plik .csv z nagłówkami:
+    file (form-data): plik .csv with headers:
     SWIFT CODE, NAME, ADDRESS, COUNTRY ISO2 CODE, COUNTRY NAME
 
-#### Odpowiedzi:
+#### Responses:
 ```http
-200 OK – plik poprawnie przetworzony
-400 Bad Request – brak pliku, zły format lub błąd parsowania
+200 OK – file processed correctly 
+400 Bad Request – no file, wrong format or parsing error  
 ```
 ---
 🔍 GET /v1/swift-codes/{swiftCode}
 
-Opis:
-Zwraca szczegóły kodu SWIFT.
-Jeśli to centrala (XXX), zwraca też powiązane oddziały.
+Description:
+Returns SWIFT code details.
+If it's a headquarter (XXX), also returns related branches.
 
-Parametry:
+Parameters:
 
     {swiftCode} – kod SWIFT (8–11 znaków)
-#### Odpowiedzi:
+#### Responses:
 ```http
-200 OK – dane znalezione
-400 Bad Request – błędny format kodu
-404 Not Found – nie znaleziono
+200 OK – data found  
+400 Bad Request – invalid code format  
+404 Not Found – not found  
 ```
 
-Przykład odpowiedzi:
+Example response:
 
 ```json
 {
@@ -88,26 +90,26 @@ Przykład odpowiedzi:
 ---
 🌍 GET /v1/swift-codes/country/{countryISO2}
 
-Opis:
-Zwraca wszystkie kody SWIFT z danego kraju.
+Description:
+Returns all SWIFT codes from a given country.
 
-Parametry:
+Parameters:
 
-    {countryISO2} – dwuliterowy kod kraju (np. PL, US)
+    {countryISO2} – dtwo-letter country code (e.g., PL, US)
 
-#### Odpowiedzi:
+#### Responses:
 ```http
-200 OK – lista kodów
-400 Bad Request – niepoprawny kod ISO2
-404 Not Found – brak danych
+200 OK –  list of codes  
+400 Bad Request – invalid ISO2 code  
+404 Not Found – no data  
 
 ```
 ---
 ➕ POST /v1/swift-codes
 
-Opis:
-Dodaje nowy kod SWIFT do bazy.
-Automatycznie łączy oddziały z centralą (jeśli istnieje), lub centralę z sierotami.
+Description:
+Adds a new SWIFT code to the database.
+Automatically links branches to the headquarter (if exists), or the headquarter to orphans.
 
 ```json
 {
@@ -118,32 +120,68 @@ Automatycznie łączy oddziały z centralą (jeśli istnieje), lub centralę z s
   "countryName": "POLAND"
 }
 ```
-#### Odpowiedzi
+#### Response
 ```http 
-200 OK – dodano rekord
-400 Bad Request – błąd walidacji
-409 Conflict – kod już istnieje
+200 OK – record added  
+400 Bad Request – validation error  
+409 Conflict – code already exists  
 
 ```
 ---
 ❌ DELETE /v1/swift-codes/{swiftCode}
 
-Opis:
-Usuwa kod SWIFT z bazy.
-Jeśli to centrala, oddziały zostają „osierocone”.
+Description:
+Deletes a SWIFT code from the database.
+If it's a headquarter, the branches become “orphaned”.
 
-Parametry:
+Parameters:
 
     {swiftCode} – kod do usunięcia
 
-#### Odpowiedzi:
+#### Responses:
 ```http 
-200 OK – usunięto poprawnie
-404 Not Found – brak kodu w bazie
-500 Internal Server Error – błąd podczas usuwania
+200 OK – deleted successfully  
+404 Not Found – code not found in database  
+500 Internal Server Error – error during deletion  
 
 
 ```
+---
+### 🧪 Input Data Validation
+
+✅ SWIFT Code
+
+Must be 8 to 11 characters long
+
+Allowed characters: letters A-Z and digits 0–9
+
+Codes ending with XXX are treated as bank headquarters
+
+Others are treated as branches
+
+A branch can be saved without a headquarter, but will be automatically linked if one exists
+
+✅ Country (ISO2 + name)
+
+    Country code (countryISO2) must be a two-letter ISO2 code, e.g., PL, US
+
+    Country name (countryName) must match the ISO2 code (e.g., PL → POLAND)
+
+    All country data is automatically converted to uppercase
+
+✅ Address (address)
+
+    Required field
+
+    Length: 3 to 500 characters
+
+    If not provided, value "No address provided" is assigned
+
+✅ Bank name (bankName)
+
+    Required field
+
+    Cannot be empty
 
 
 
@@ -151,9 +189,9 @@ Parametry:
 
 ---
 
-### ✅ Instrukcja uruchomienia projektu – InternSwiftCodesProject
+### ✅ Project Launch Instructions – InternSwiftCodesProject
 
-#### 📦 Wymagania
+#### 📦 Requirements
 - Java 17+
 - Maven 3.8+
 - Docker & Docker Compose
@@ -161,23 +199,23 @@ Parametry:
 
 ---
 
-### 🚀 Szybki start
+### 🚀 Quick Start
 
-#### 1. 🔁 Sklonuj repozytorium
+#### 1. 🔁 Clone the repository
 ```bash
 git clone https://github.com/LawyerN/InterbSwiftCodesProject.git
 cd InternSwiftCodesProject
 ```
 
-#### 2. 📄 Utwórz plik `.env`
+#### 2. 📄 Create .env file
 
-Na podstawie przykładowego pliku `.env.example`:
+Based on the sample `.env.example` file:
 
 ```bash
 cp .env.example .env
 ```
 
-Możesz edytować dane logowania do bazy:
+You can edit database login data:
 ```env
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=haslo123
@@ -185,55 +223,54 @@ POSTGRES_PASSWORD=haslo123
 
 ---
 
-### Dodaj plik z danymi CSV
-Umieść swój plik .csv w katalogu
+### Add CSV data file
+UPlace your .csv file in the directory:
 ````bash
 src/main/resources/data/
 ````
-Wymagania dla pliku CSV:
+CSV file requirements:
+- Any name, must end with .csv
 
-- Nazwa dowolna, musi kończyć się na .csv
-
-- Nagłówki muszą zawierać:
+- Headers must contain:
 ```bash
 SWIFT CODE, NAME, ADDRESS, COUNTRY ISO2 CODE, COUNTRY NAME
 - ```
-- Dane zostaną automatycznie zaimportowane przy starcie aplikacji
+- Data will be automatically imported on application start
 
 
 
-### 🐳 Uruchamianie przez Docker
+### 🐳 Running with Docker
 
-#### 1. Wyczyść poprzednie buildy(jest to konieczne, żeby potem zadziałało polecenie z punktu 2)
+#### 1. Clean previous builds (required to make step 2 work)
 ```bash
 mvn clean
 ```
 
-#### 2. Zbuduj i uruchom kontenery
+#### 2. Build and run containers
 
 ```bash
 docker-compose up --build
 ```
 
-- Aplikacja będzie dostępna pod: [http://localhost:8080](http://localhost:8080)
-- PostgreSQL nasłuchuje na porcie: `5432`
+- The app will be avaliable at [http://localhost:8080](http://localhost:8080)
+- Postgres listens on port: `5432`
 
 ---
 
-### 🥪 Uruchamianie testów
+### 🥪 Running tests
 
-Lokalnie:
+Locally:
 ```bash
 ./mvnw test
 ```
 
-> Projekt używa bazy **H2 in-memory** do testów (nie wymaga Dockera ani PostgreSQL).
+> The project uses H2 in-memory database for testing (no Docker or PostgreSQL required).
 
 ---
 
 
 
-### 🚠 Struktura plików
+### 🚠 File Structure
 
 ```
 ├── src/
@@ -255,15 +292,15 @@ Lokalnie:
 
 
 
-Każdy użytkownik powinien sam stworzyć `.env` lokalnie lub w środowisku CI/CD.
+Each user should create their own .env locally or in a CI/CD environment.
+### 🤖 AI Support
 
-### 🤖 Wsparcie AI
+PDuring this project, I used ChatGPT to help with:
 
-Podczas pracy nad tym projektem wspierałem się ChatGPT – m.in. przy:
+- refining validation logic,
 
-- dopracowywaniu logiki walidacji,
-- pisaniu testów i opisie endpointów,
-- tworzeniu dokumentacji (README).
+- writing tests and describing endpoints,
 
-Całość projektu została zbudowana i zrozumiana przeze mnie – ChatGPT służył jako asystent
+- creating documentation (README).
 
+The entire project was built and understood by me – ChatGPT served as an assistant.
