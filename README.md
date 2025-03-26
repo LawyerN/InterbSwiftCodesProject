@@ -34,7 +34,7 @@ This application was built to:
 ---
 
 ### Endpoint description
-📤 POST /upload/swift
+#### 📤 POST /upload/swift
 
 Description:
 Uploads a CSV file with SWIFT data. Data is validated, parsed, and saved to the database.
@@ -49,7 +49,7 @@ Parameters:
 400 Bad Request – no file, wrong format or parsing error  
 ```
 ---
-🔍 GET /v1/swift-codes/{swiftCode}
+#### 🔍 GET /v1/swift-codes/{swiftCode}
 
 Description:
 Returns SWIFT code details.
@@ -88,7 +88,7 @@ Example response:
 
 ```
 ---
-🌍 GET /v1/swift-codes/country/{countryISO2}
+#### 🌍 GET /v1/swift-codes/country/{countryISO2}
 
 Description:
 Returns all SWIFT codes from a given country.
@@ -105,7 +105,7 @@ Parameters:
 
 ```
 ---
-➕ POST /v1/swift-codes
+#### ➕ POST /v1/swift-codes
 
 Description:
 Adds a new SWIFT code to the database.
@@ -128,7 +128,7 @@ Automatically links branches to the headquarter (if exists), or the headquarter 
 
 ```
 ---
-❌ DELETE /v1/swift-codes/{swiftCode}
+#### ❌ DELETE /v1/swift-codes/{swiftCode}
 
 Description:
 Deletes a SWIFT code from the database.
@@ -151,37 +151,37 @@ Parameters:
 
 ✅ SWIFT Code
 
-Must be 8 to 11 characters long
+- Must be 8 to 11 characters long
 
-Allowed characters: letters A-Z and digits 0–9
+- Allowed characters: letters A-Z and digits 0–9
 
-Codes ending with XXX are treated as bank headquarters
+- Codes ending with XXX are treated as bank headquarters
 
-Others are treated as branches
+- Others are treated as branches
 
-A branch can be saved without a headquarter, but will be automatically linked if one exists
+- A branch can be saved without a headquarter, but will be automatically linked if one exists
 
 ✅ Country (ISO2 + name)
 
-    Country code (countryISO2) must be a two-letter ISO2 code, e.g., PL, US
+ - Country code (countryISO2) must be a two-letter ISO2 code, e.g., PL, US
 
-    Country name (countryName) must match the ISO2 code (e.g., PL → POLAND)
+ - Country name (countryName) must match the ISO2 code (e.g., PL → POLAND)
 
-    All country data is automatically converted to uppercase
+ - All country data is automatically converted to uppercase
 
 ✅ Address (address)
 
-    Required field
+- Required field
 
-    Length: 3 to 500 characters
+- Length: 3 to 500 characters
 
-    If not provided, value "No address provided" is assigned
+- If not provided, value "No address provided" is assigned
 
 ✅ Bank name (bankName)
 
-    Required field
+ - Required field
 
-    Cannot be empty
+ - Cannot be empty
 
 
 
@@ -204,7 +204,7 @@ A branch can be saved without a headquarter, but will be automatically linked if
 #### 1. 🔁 Clone the repository
 ```bash
 git clone https://github.com/LawyerN/InterbSwiftCodesProject.git
-cd InternSwiftCodesProject
+cd InterbSwiftCodesProject
 ```
 
 #### 2. 📄 Create .env file
@@ -224,6 +224,7 @@ POSTGRES_PASSWORD=haslo123
 ---
 
 ### Add CSV data file
+I added example file in data/examplecsv.csv
 Place your .csv file in the directory:
 ````bash
 src/main/resources/data/
@@ -234,7 +235,8 @@ CSV file requirements:
 - Headers must contain:
 ```bash
 SWIFT CODE, NAME, ADDRESS, COUNTRY ISO2 CODE, COUNTRY NAME
-- ```
+```
+
 - Data will be automatically imported on application start
 
 
