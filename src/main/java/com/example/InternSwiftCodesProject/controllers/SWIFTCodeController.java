@@ -20,19 +20,23 @@ public class SWIFTCodeController {
     }
 
     @GetMapping("/{swiftCode}")
+    // Fetch full details of a SWIFT code (branch or HQ)
     public ResponseEntity<?> getSwiftCodeDetails(@PathVariable String swiftCode) {
         Map<String, String> errorResponse = new HashMap<>();
         swiftCode=swiftCode.trim().toUpperCase();
 
+        // Validate SWIFT code format
         if (swiftCode.length() < 8 || swiftCode.length() > 11) {
             errorResponse.put("error", "Invalid SWIFT code format");
             errorResponse.put("message", "SWIFT code should be exactly 8 to 11 characters long");
             return ResponseEntity.badRequest().body(errorResponse);
         }
 
+        // Fetch SWIFT code details from DB
         Optional<SwiftCode> swiftCodeOptional = swiftCodeService.getSwiftCodeDetails(swiftCode);
 
 
+        // Return 404 if not found
         if (swiftCodeOptional.isEmpty()) {
             errorResponse.put("error", "SWIFT code not found");
             errorResponse.put("message", "The SWIFT code is correctly formatted but does not exist in the database.");
@@ -46,6 +50,7 @@ public class SWIFTCodeController {
 
         SwiftCode swiftCodeDetails = swiftCodeOptional.get();
 
+        // If the SWIFT code is a headquarter, include all its branches
         if (swiftCodeDetails.isHeadquarterFlag()) {
             List<SwiftCode> branchesList = swiftCodeService.getBranchesForHeadquarter(swiftCode);
             List<SWIFTCodeDTO> branches = new ArrayList<>();
@@ -61,6 +66,7 @@ public class SWIFTCodeController {
                 ));
             }
 
+            // Return detailed HQ data with all linked branches
             SwiftCodeWithBranchesDTO response = new SwiftCodeWithBranchesDTO(
                     swiftCodeDetails.getAddress(),
                     swiftCodeDetails.getBankName(),
@@ -74,6 +80,7 @@ public class SWIFTCodeController {
             return ResponseEntity.ok(response);
         }
 
+        // Return simple branch info
         SWIFTCodeDTO response = new SWIFTCodeDTO(
                 swiftCodeDetails.getAddress(),
                 swiftCodeDetails.getBankName(),
@@ -92,6 +99,7 @@ public class SWIFTCodeController {
         List<SwiftCode> swiftCodes = swiftCodeService.getSwiftCodesByCountry (countryISO2);
         Map<String, String> errorResponse = new HashMap<>();
 
+        // Validate ISO2 code
         if (!SWIFTCodeService.isValidCountryCode(countryISO2)) {
             errorResponse.put("error", "Invalid country code");
             errorResponse.put("message", "Country ISO2 code '" + countryISO2 + "' is not valid.");
@@ -117,7 +125,7 @@ public class SWIFTCodeController {
             ));
         }
 
-
+        // Build final response structure
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("countryISO2", countryISO2.toUpperCase());
         response.put("countryName", countryName);
@@ -138,6 +146,7 @@ public class SWIFTCodeController {
         String address = swiftCode.getAddress().trim();
         String bankName = swiftCode.getBankName() != null ? swiftCode.getBankName().trim() : "";
 
+        // Basic field validations
         if (swift.isEmpty() || countryISO2.isEmpty() || countryName.isEmpty() || bankName.isEmpty()) {
             errorResponse.put("error", "Missing required fields");
             errorResponse.put("message", "All fields (swiftCode, countryISO2, countryName, address, bankName) must be provided.");
@@ -192,9 +201,7 @@ public class SWIFTCodeController {
         String swiftPrefix = swift.substring(0, 8);
         String expectedHQCode = swiftPrefix + "XXX";
 
-        // Jeśli branch → sprawdź czy HQ istnieje
-        //Optional<SwiftCode> hq = swiftCodeService.getSwiftCodeDetails(expectedHQCode);
-        //hq.ifPresent(swiftCode::setHeadquarter);
+
 
         // Set fields
         swiftCode.setSwiftCode(swift);
@@ -204,7 +211,7 @@ public class SWIFTCodeController {
         swiftCode.setAddress(address);
         swiftCode.setBankName(bankName);
 
-        // Save SWIFT Code
+        // Save SWIFT Code Case 1; Branch
         if (!isHeadquarter) {
             //SwiftCode savedHQ = swiftCodeService.saveSwiftCode(swiftCode);
             // Branch is allowed to be saved as orphan (without HQ)
@@ -217,9 +224,9 @@ public class SWIFTCodeController {
         }
 
         // === CASE 2: Headquarter ===
-        // First, save the HQ itself (so it gets ID)
+        // First, save the HQ itself
         SwiftCode savedHQ = swiftCodeService.saveSwiftCode(swiftCode);
-        // Now update all orphan branches
+        // Link any orphan branches with the same prefix
         List<SwiftCode> orphanBranches = swiftCodeService.findBranchesByPrefix(swiftPrefix);
         for (SwiftCode branch : orphanBranches) {
             if (branch.getHeadquarter() == null) {

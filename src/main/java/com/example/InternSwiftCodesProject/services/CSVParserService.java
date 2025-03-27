@@ -22,23 +22,26 @@ public class CSVParserService {
     private SWIFTCodeController swiftCodeController;
 
 
-
+    // Constructor injection of dependencies
     public CSVParserService(SWIFTCodeRepo repository, SWIFTCodeController swiftCodeController) {
         this.swiftCodeController = swiftCodeController;
         this.repository = repository;
     }
-//    File file = new File("src/main/resources/test.csv");
+    // This method is automatically called after the service is initialized
     @PostConstruct
     public void init() {
         try {
+            // Resolve all CSV files located in the classpath under 'data/' folder
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
             Resource[] resources = resolver.getResources("classpath:data/*.csv");
 
-
+            // Loop through each found resource (CSV file)
             for (Resource resource : resources) {
+                // Skip files that don't have .csv extension
                 if (!Objects.requireNonNull(resource.getFilename()).endsWith(".csv")) {
 
                 }
+                // Try to open and parse each file
                 try (InputStream inputStream = resource.getInputStream()) {
                     System.out.println("Processing: " + resource.getFilename());
                     parseAndStoreSwiftData(inputStream);
@@ -55,14 +58,17 @@ public class CSVParserService {
 
 
 
-
+    // Parses a single CSV input stream and stores the data via the controller
     public void parseAndStoreSwiftData(InputStream stream) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(stream))) {
+            // Use Apache Commons CSV to parse the data with headers
             CSVParser csvParser = CSVParser.parse(reader, CSVFormat.DEFAULT.withFirstRecordAsHeader());
-            int added = 0;
-            int skipped = 0;
+            int added = 0; // Track successfully added records
+            int skipped = 0;// Track skipped records
 
+            // Iterate over each CSV record
             for (CSVRecord record : csvParser) {
+                // Create a SwiftCode object from CSV data
                 SwiftCode swiftCode = new SwiftCode(
                         record.get("SWIFT CODE").trim(),
                         record.get("NAME").trim(),
@@ -72,6 +78,7 @@ public class CSVParserService {
                         record.get("SWIFT CODE").trim().endsWith("XXX")
                 );
 
+                // Try to add the SWIFT code using the controller
                 ResponseEntity<Map<String, String>> response = swiftCodeController.addSwiftCode(swiftCode);
                 if (response.getStatusCode().is2xxSuccessful()) {
                     added++;

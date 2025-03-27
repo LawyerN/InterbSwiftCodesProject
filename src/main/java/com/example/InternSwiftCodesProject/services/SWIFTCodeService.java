@@ -12,11 +12,14 @@ import java.util.Optional;
 @Service
 public class SWIFTCodeService {
     private final SWIFTCodeRepo swiftCodeRepo;
+    // Constructor-based dependency injection
     public SWIFTCodeService(SWIFTCodeRepo swiftCodeRepo) {
         this.swiftCodeRepo = swiftCodeRepo;
     }
-
+    // Map of ISO2 country codes to full country names
     private static final Map<String, String> COUNTRY_NAME_MAP = Map.ofEntries(
+            // A long list of mappings from ISO2 code to country name
+            // Used for validating and converting country codes
             Map.entry("AF", "AFGHANISTAN"),
             Map.entry("AL", "ALBANIA"),
             Map.entry("DZ", "ALGERIA"),
@@ -129,52 +132,61 @@ public class SWIFTCodeService {
             Map.entry("MT", "MALTA")
 
     );
-
+    // Check if a given ISO2 country code is valid (exists in the map)
     public static boolean isValidCountryCode(String iso2) {
         return COUNTRY_NAME_MAP.containsKey(iso2);
     }
 
+    // Get full country name from ISO2 code, or "UNKNOWN" if not found
     public static String getCorrectCountryName(String iso2) {
         return COUNTRY_NAME_MAP.getOrDefault(iso2, "UNKNOWN");
     }
 
+    // Retrieve all SWIFT codes for a given ISO2 country code
     public List<SwiftCode> getSwiftCodesByCountry(String countryISO2) {
         return swiftCodeRepo.findByCountryISO2IgnoreCase(countryISO2);
     }
 
+    // Retrieve all branch SWIFT codes that start with the given prefix
     public List<SwiftCode> findBranchesByPrefix(String prefix) {
         return swiftCodeRepo.findBySwiftCodeStartingWithAndHeadquarterFlagFalse(prefix);
     }
 
-
+    // Find full details of a single SWIFT code (by ID)
     public Optional<SwiftCode> getSwiftCodeDetails(String swiftCode) {
         return swiftCodeRepo.findById(swiftCode.toUpperCase());
     }
 
+    // Find all branches linked to a given headquarter SWIFT code
     public List<SwiftCode> getBranchesForHeadquarter(String headquarterSwift) {
         return swiftCodeRepo.findByHeadquarter_SwiftCode(headquarterSwift);
     }
 
+    // Save a new SWIFT code, and handle logic related to headquarters
     public SwiftCode saveSwiftCode(SwiftCode swiftCode) {
         Map<String, String> errorResponse = new HashMap<>();
         String swiftUpper = swiftCode.getSwiftCode().toUpperCase();
-        swiftCode.setSwiftCode(swiftUpper);
+        swiftCode.setSwiftCode(swiftUpper);// Normalize SWIFT code to uppercase
         System.out.println("Received SWIFT Code: " + swiftCode.getSwiftCode());
         System.out.println("Length: " + swiftCode.getSwiftCode().length());
-        //String swiftUpper = swiftCode.getSwiftCode().toUpperCase();
+
+        // Check if the SWIFT code already exists
         if (swiftCodeRepo.existsBySwiftCode(swiftUpper)) {
             errorResponse.put ("Attempted to add duplicate SWIFT code: {}", swiftUpper);
             throw new IllegalArgumentException("SWIFT code " + swiftUpper + " already exists.");
         }
+
+        // If the code is a headquarter, link all orphan branches to it
         if (swiftCode.isHeadquarterFlag()) {
             String swiftPrefix = swiftUpper.substring(0, 8);
 
-            // Szukamy osieroconych branchy bez przypisanego HQ
+            // Find orphan branches with matching prefix and no headquarter assigned
+
             List<SwiftCode> orphanBranches = swiftCodeRepo.findByHeadquarterIsNullAndSwiftCodeStartingWith(swiftPrefix);
 
             for (SwiftCode branch : orphanBranches) {
-                branch.setHeadquarter(swiftCode); // Przypisujemy nowo dodanemu HQ
-                swiftCodeRepo.save(branch); // Aktualizujemy w bazie
+                branch.setHeadquarter(swiftCode); // Link to this HQ
+                swiftCodeRepo.save(branch); // Update the branch in DB
             }
         }
 
@@ -184,6 +196,8 @@ public class SWIFTCodeService {
         return swiftCode;
     }
 
+
+    // Delete a SWIFT code (and unlink branches if it's a headquarter)
     public boolean deleteSwiftCode(String swiftCode) {
         Optional<SwiftCode> optional = swiftCodeRepo.findById(swiftCode);
 
@@ -194,7 +208,8 @@ public class SWIFTCodeService {
         SwiftCode codeToDelete = optional.get();
 
         if (codeToDelete.isHeadquarterFlag()) {
-            // Odłącz branche
+
+            // Unlink all branches from this headquarter
             List<SwiftCode> branches = swiftCodeRepo.findByHeadquarter(codeToDelete);
             for (SwiftCode branch : branches) {
                 branch.setHeadquarter(null);
@@ -202,9 +217,11 @@ public class SWIFTCodeService {
             }
         }
 
+        // Delete the SWIFT code from the repository
         swiftCodeRepo.deleteById(swiftCode);
         return true;
     }
+    // Check if a SWIFT code already exists in the system
     public boolean existsBySwiftCode(String swiftCode) {
         return swiftCodeRepo.existsBySwiftCode(swiftCode.toUpperCase());
     }

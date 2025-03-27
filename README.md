@@ -237,7 +237,7 @@ CSV file requirements:
 SWIFT CODE, NAME, ADDRESS, COUNTRY ISO2 CODE, COUNTRY NAME
 ```
 
-- Data will be automatically imported on application start
+- Data will be automatically imported on application start(it won't be loaded while app is running )
 
 
 
@@ -265,6 +265,63 @@ Locally:
 ```bash
 ./mvnw test
 ```
+#### ✅ The test suite covers:
+
+- CSV Upload:
+
+    - Successful upload
+
+    - Empty file
+
+    - Wrong file format (non-CSV)
+
+- GET /v1/swift-codes/{swiftCode}:
+
+    - Valid code
+
+    - Non-existent code (404)
+
+    - Invalid format (400)
+
+- GET /v1/swift-codes/country/{ISO2}:
+
+    - Valid country with data
+
+    - Lowercase ISO2 support
+
+    - No data for country
+
+    - Invalid ISO2 format
+
+- POST /v1/swift-codes:
+
+    - Adding HQ or branch
+
+    - Missing fields
+
+    - Country name mismatch
+
+    - Invalid characters in SWIFT code
+
+    - Duplicate code (409)
+
+    - Too short address
+
+- DELETE /v1/swift-codes/{swiftCode}:
+
+    - Delete branch
+
+    - Delete HQ and orphan branches
+
+    - Delete non-existing code (404)
+
+#### 📦 Frameworks used:
+
+- JUnit 5
+
+- Spring Boot Test
+
+- MockMvc
 
 > The project uses H2 in-memory database for testing (no Docker or PostgreSQL required).
 
