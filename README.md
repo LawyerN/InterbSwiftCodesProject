@@ -260,9 +260,10 @@ docker-compose up --build
 - Postgres listens on port: `5432`
 
 If you add csv to data then run:
+```bash
 docker-compose down
 docker-compose up --build
-
+```
 ---
 
 ### 🥪 Running tests
