@@ -212,7 +212,9 @@ cd InterbSwiftCodesProject
 Based on the sample `.env.example` file:
 
 ```bash
-cp .env.example .env
+cp .env.example .env (Linux)
+copy .env.example .env (Windows cmd)
+
 ```
 
 You can edit database login data:
