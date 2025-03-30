@@ -259,6 +259,10 @@ docker-compose up --build
 - The app will be avaliable at [http://localhost:8080](http://localhost:8080)
 - Postgres listens on port: `5432`
 
+If you add csv to data then run:
+docker-compose down
+docker-compose up --build
+
 ---
 
 ### 🥪 Running tests
